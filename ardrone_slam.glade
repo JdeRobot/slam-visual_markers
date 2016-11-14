@@ -1,0 +1,53 @@
+<?xml version="1.0"?>
+<glade-interface>
+  <!-- interface-requires gtk+ 2.6 -->
+  <!-- interface-naming-policy toplevel-contextual -->
+  <widget class="GtkWindow" id="world_window">
+    <property name="title" translatable="yes">3D WORLD</property>
+    <child>
+      <widget class="GtkFixed" id="fixed1">
+        <property name="visible">True</property>
+        <!-- <child>
+          <widget class="GtkButton" id="deleteLinesButton">
+            <property name="label" translatable="yes">Delete Lines</property>
+            <property name="width_request">100</property>
+            <property name="height_request">50</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="yalign">0.46000000834465027</property>
+          </widget>
+          <packing>
+            <property name="x">1</property>
+            <property name="y">451</property>
+          </packing>
+        </child> -->
+        <child>
+          <widget class="GtkDrawingArea" id="world">
+            <property name="width_request">994</property>
+            <property name="height_request">450</property>
+            <property name="visible">True</property>
+          </widget>
+          <packing>
+            <property name="x">1</property>
+            <property name="y">1</property>
+          </packing>
+        </child>
+        <!-- <child>
+          <widget class="GtkButton" id="pioneerCameraButton">
+            <property name="label" translatable="yes">Pioneer View Point</property>
+            <property name="width_request">100</property>
+            <property name="height_request">50</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+          </widget>
+          <packing>
+            <property name="x">100</property>
+            <property name="y">451</property>
+          </packing>
+        </child> -->
+      </widget>
+    </child>
+  </widget>
+</glade-interface>
