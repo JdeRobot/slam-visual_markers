@@ -2,17 +2,19 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include "sensors.h"
-#include "cameramanager.h"
-#include "markerinfo.h"
-#include "kalmanfilter.h"
-#include "weightedaveragefilter.h"
+#include "sensors/sensors.h"
+#include "algorithm/cameramanager.h"
+#include "algorithm/markerinfo.h"
+#include "algorithm/kalmanfilter.h"
+#include "algorithm/weightedaveragefilter.h"
 #include "april_tags/apriltag.h"
-#include "world.h"
-#include "IGraphichAlgorithmer.h"
+#include "algorithm/world.h"
+#include "algorithm/IGraphichAlgorithmer.h"
 #include "ardronedefines.h"
 #include <QLineEdit>
 #include "sharer.h"
+#include "rosPublisher.h"
+
 
 namespace Ui {
 class MainWindow;
@@ -36,6 +38,14 @@ private:
     QTimer* m_Timer;
     Sensors* m_Sensors;
     Eigen::Matrix4d m_RT;
+    Sharer *sharer;
+	rosPublisher *myPublisher;
+
+	int m_option; //ICE or ROS
+	std::string m_topic;
+	std::string m_calibFile;
+
+
 
 public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
@@ -44,6 +54,9 @@ public:
     ~MainWindow();
 
     void setSensors(Sensors* sensors);
+	void setOption(int option, std::string);
+	void setCalibFile(std::string calib_filename);
+
     void updateThreadGUI();
 
     virtual void RunGraphicAlgorithm();
@@ -64,8 +77,9 @@ private Q_SLOTS:
     void on_copyBtn_clicked();
 
 private:
-    Sharer *sharer;
+
     Ui::MainWindow *ui;
+
 
 private:
     void RegisterError();

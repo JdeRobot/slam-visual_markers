@@ -36,6 +36,15 @@ namespace Ardrone
         cv::Mat m_MarkerPoints;
         std::map<int, cv::Mat> m_DetectedMarkerPoints;
         int m_LastMarkerDetected;
+		std::string m_mapfile;
+		
+
+        //###
+        std::vector<Pose, Eigen::aligned_allocator<Pose> > m_BalPoses;
+        std::vector<TPinHoleCamera, Eigen::aligned_allocator<TPinHoleCamera> > m_BalCameras;
+        //###
+
+
 
 #if USE_APRIL_TAGS_C_LIBRARY
         april_tag_family_t* m_TagFamily;
@@ -45,7 +54,9 @@ namespace Ardrone
 #endif
 
     private:
-        static double GetMarkerSize();
+
+      	static double GetMarkerSize();
+
         static std::map<int, Ardrone::MarkerInfo*> BuildMarkers();
 
         void DrawRectangle(cv::Mat& image, const std::vector<cv::Point2f>& points, const cv::Scalar& color, int width);
@@ -55,11 +66,12 @@ namespace Ardrone
 
     public:
         static double GetWeight(double distance);
+        static double GetWeightPose(double distance);
 
     public:
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-        CameraManager(const std::string& calibFile, double foaX, double foaY, double foaZ);
+        CameraManager(const std::string& calibFile,  double foaX, double foaY, double foaZ);
         virtual ~CameraManager();
 
         const TPinHoleCamera& GetRealCamera();
@@ -75,6 +87,12 @@ namespace Ardrone
         void SetRealPose(double x, double y, double z, double h, double roll, double pitch, double yaw);
         void SetEstimatedPose(double x, double y, double z, double h, double roll, double pitch, double yaw);
         void SetEstimatedPose(const Eigen::Matrix4d& rt);
+        //#####
+        void setBalPoses(double x, double y, double z, double h, double roll, double pitch, double yaw);
+        std::vector<TPinHoleCamera, Eigen::aligned_allocator<TPinHoleCamera> >& GetBalCameras();
+        std::vector<Pose, Eigen::aligned_allocator<Pose> >& GetBalPoses();
+
+        //#####
 
         bool ProcessImage(cv::Mat& image);
 

@@ -3,10 +3,11 @@
 #include "drawingutils.h"
 #include "april_tags/tag36h11.h"
 #include "april_tags/matd.h"
+#include "opencv2/videoio.hpp"
 
 using namespace Ardrone;
 
-#define WEIGHTED_AVERAGE_FILTER_SIZE 5
+#define WEIGHTED_AVERAGE_FILTER_SIZE 3
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -17,13 +18,20 @@ MainWindow::MainWindow(QWidget *parent) :
 
     m_World = new World(this);  
 
-    m_CameraManager = new CameraManager("web_camera.yml", 0, 0, 1); //(0, 0, 1) porque el eje óptico de la cámara es el eje z, me sirve para calcular el foa
+   
     m_KalmanFilter = new KalmanFilter();
     m_WeightedAverageFilter = new WeightedAverageFilter(WEIGHTED_AVERAGE_FILTER_SIZE);
-    m_TemporalFusionFilter = TEMPORAL_FUSION_FILTER_NONE;
-    //m_RT = GeometryUtils::BuildRTMat(0, -0.15, 0, 0, 0, 0);
 
-    sharer = Sharer::getInstance();
+    //FILTER TYPE
+    m_TemporalFusionFilter = TEMPORAL_FUSION_FILTER_NONE;
+
+    //m_RT = GeometryUtils::BuildRTMat(0, -0.15, 0, 0, 0, 0);
+	
+	
+
+	
+
+
 
 //    time_t t = time(0);
 //    struct tm* now = localtime(&t);
@@ -73,6 +81,7 @@ MainWindow::updateThreadGUI()
 
     if (m_CameraManager->ProcessImage(m_Image)) //Si se han detectado balizas
     {
+        /*
         if (m_TemporalFusionFilter == TEMPORAL_FUSION_FILTER_KALMAN)
         {
             Pose p = m_KalmanFilter->GetFilteredPose(m_CameraManager->GetEstimatedPose());
@@ -84,14 +93,55 @@ MainWindow::updateThreadGUI()
             Pose p = m_WeightedAverageFilter->GetFilteredPose(m_CameraManager->GetEstimatedPose());
             m_CameraManager->SetEstimatedPose(p.GetX(), p.GetY(), p.GetZ(), p.GetH(), p.GetRoll(), p.GetPitch(), p.GetYaw());
         }
-        sharer->setPose3D(m_CameraManager->GetEstimatedPose(), 1);
+        */
+
+
         //RegisterError();
+
+        //PASAR LOS DOS FILTROS (TESTS)
+        /*
+        Pose p = m_WeightedAverageFilter->GetFilteredPose(m_CameraManager->GetEstimatedPose());
+        m_CameraManager->SetEstimatedPose(p.GetX(), p.GetY(), p.GetZ(), p.GetH(), p.GetRoll(), p.GetPitch(), p.GetYaw());
+        printf("--- %03f %03f %03f ---\n", p.GetX(), p.GetY(), p.GetZ());
+        */
+        Pose p = m_KalmanFilter->GetFilteredPose(m_CameraManager->GetEstimatedPose());
+        m_CameraManager->SetEstimatedPose(p.GetX(), p.GetY(), p.GetZ(), p.GetH(), p.GetRoll(), p.GetPitch(), p.GetYaw());
+        printf("--- %03f %03f %03f ---\n", p.GetX(), p.GetY(), p.GetZ());
+        printf("------------------------------------------------------------");
+
+
+        p = m_WeightedAverageFilter->GetFilteredPose(m_CameraManager->GetEstimatedPose());
+                m_CameraManager->SetEstimatedPose(p.GetX(), p.GetY(), p.GetZ(), p.GetH(), p.GetRoll(), p.GetPitch(), p.GetYaw());
+                printf("--- %03f %03f %03f ---\n", p.GetX(), p.GetY(), p.GetZ());
+		
+
+		if (m_option == 2)
+		{
+
+		myPublisher->setPose(m_CameraManager->GetEstimatedPose());
+		}
+		
+		else
+		{
+        sharer->setPose3D(m_CameraManager->GetEstimatedPose(), 1);
+		}
     }
     else
-    {
-        sharer->setPose3D(m_CameraManager->GetEstimatedPose(), 0);
-        m_KalmanFilter->Reset();
-        m_WeightedAverageFilter->Reset();
+    {	
+
+			if (m_option == 2)
+			{
+			//myPublisher->publishPose(0,0,0,0,0,0);
+				myPublisher->setPose(m_CameraManager->GetEstimatedPose());
+			}		
+			else
+			{
+		    sharer->setPose3D(m_CameraManager->GetEstimatedPose(), 0);
+			}
+		
+
+        //m_KalmanFilter->Reset();
+        //m_WeightedAverageFilter->Reset();
     }
 
     if (ui->realMarkerChk->isChecked())
@@ -125,6 +175,35 @@ void MainWindow::setSensors(Sensors* sensors)
     m_Sensors = sensors;
 }
 
+void MainWindow::setOption(int option, std::string topic)
+{
+	m_option = option;
+	if (m_option==2)
+	{	
+		std::cout<<"ROS selected to publish pose3d"<<std::endl;
+		myPublisher = new rosPublisher(topic);
+
+	}
+	else
+	{
+		sharer = Sharer::getInstance();
+	}
+
+
+}
+
+void MainWindow::setCalibFile(std::string calib_filename)
+{
+	m_calibFile = calib_filename;
+ 	m_CameraManager = new CameraManager(m_calibFile, 0, 0, 1); //(0, 0, 1) porque el eje óptico de la cámara es el eje z, me sirve para calcular el foa
+
+}
+
+
+
+
+
+
 void MainWindow::updateGUI_recieved()
 {
     QImage imageQt = QImage((const unsigned char*)(m_Image.data),
@@ -148,6 +227,19 @@ void MainWindow::RunGraphicAlgorithm()
 
     //Cámara calculada
     DrawingUtils::drawCamera(m_CameraManager->GetEstimatedCamera(), cvPoint3D32f(0.0, 0.0, 1.0), m_CameraManager->GetIntrinsicsMatrix(), m_CameraManager->GetEstimatedPose().GetRT().inverse().eval());
+
+
+
+    //COSAS MÍAS
+    //CÁMARAS DE LAS BALIZAS
+    std::vector<TPinHoleCamera, Eigen::aligned_allocator<TPinHoleCamera> >& BalCams = m_CameraManager->GetBalCameras();
+    std::vector<Pose, Eigen::aligned_allocator<Pose> >& BalPos = m_CameraManager->GetBalPoses();
+    for (int i = 0; i < BalCams.size(); ++i)
+    {
+        printf("hello");
+        DrawingUtils::drawCamera(BalCams[i], cvPoint3D32f(0.5, 0.5, 1.0), m_CameraManager->GetIntrinsicsMatrix(), BalPos[i].GetRT().inverse().eval());
+    }
+
 
     //Cámara real
     //DrawingUtils::drawCamera(m_CameraManager->GetRealCamera(), cvPoint3D32f(1.0, 0.0, 0.0), m_CameraManager->GetIntrinsicsMatrix(), m_CameraManager->GetRealPose().GetRT().inverse().eval());
@@ -218,6 +310,7 @@ void MainWindow::on_tempFusionChk_toggled(bool checked)
 {
     ui->kalmanRdb->setEnabled(checked);
     ui->weightRdb->setEnabled(checked);
+
     if (!checked)
     {
         m_TemporalFusionFilter = TEMPORAL_FUSION_FILTER_NONE;
