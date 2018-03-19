@@ -32,4 +32,4 @@ To launch this component you need some files:
 Anyways, to launch the component you have to type:
 > $ slam_markers path_to_configuration.yml path_to_calibration_file.yml
 
-Where you launch it, it must contains the files "markers.txt".
+Where you launch it, it must contains the files "markers.txt" and "ardrone_slam.glade".
