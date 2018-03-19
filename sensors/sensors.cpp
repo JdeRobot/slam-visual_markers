@@ -5,7 +5,7 @@
 Sensors::Sensors(Comm::Communicator* jdrc)
 {
 	this-> jdrc = jdrc;
-	this-> camera = Comm::getCameraClient(jdrc,"CamAutoloc.Camera");
+	this-> camera = Comm::getCameraClient(jdrc,"VisualMarkers.Camera");
 
 
 }

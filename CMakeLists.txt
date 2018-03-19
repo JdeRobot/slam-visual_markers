@@ -39,6 +39,8 @@ set(SOURCES_FILES 	sensors/threadsensors.cpp
 		        src/main.cpp
 		        sensors/sensors.cpp
 				algorithm/rosPublisher.cpp
+				algorithm/numMarkerPublisherROS.cpp
+				algorithm/timerPublisherROS.cpp
 			gui/threadgui.cpp 
 			sensors/sensors.cpp 
 			sensors/threadsensors.cpp 
@@ -88,6 +90,8 @@ set(HEADERS 		sensors/threadsensors.h
                 	gui/threadgui.h
                 	gui/mainwindow.h
 					algorithm/rosPublisher.h
+				algorithm/numMarkerPublisherROS.h
+				algorithm/timerPublisherROS.h
 			gui/threadgui.h
 			AprilTags/april_tags/apriltag.h 
 			AprilTags/april_tags/zhash.h 

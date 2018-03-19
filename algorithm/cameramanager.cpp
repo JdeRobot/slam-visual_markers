@@ -26,7 +26,8 @@ using namespace Ardrone;
 CameraManager::CameraManager(/*int rows, int columns, */const std::string& calibFile,double foaX, double foaY, double foaZ)
 {
 
-
+	//inicializamos el numero de markers detectadas a 0
+	m_numMarkerDetected.data = 0;
     //Matriz de parámetros intrínsecos
     ifstream file(calibFile);
     
@@ -567,6 +568,7 @@ CameraManager::ProcessImage(cv::Mat& image)
         april_tag_detection_t* det;
         zarray_get(detections, i, &det);
 
+
 //            printf("detection %3d: id %4d, hamming %d, goodness %f, center (%f, %f) hom:\n(%f, %f, %f;\n%f, %f, %f;\n%f %f, %f)\n",
 //               i, det->id, det->hamming, det->goodness, det->c[0], det->c[1],
 //               MAT_EL(det->H, 0, 0), MAT_EL(det->H, 0, 1), MAT_EL(det->H, 0, 2),
@@ -670,11 +672,15 @@ CameraManager::ProcessImage(cv::Mat& image)
     cv::Mat imageGray;
     cv::cvtColor(image, imageGray, CV_BGR2GRAY);
     std::vector<AprilTags::TagDetection> detections = m_TagDetector->extractTags(imageGray);
+	m_numMarkerDetected.data = 0;
+
     for (std::vector<AprilTags::TagDetection>::iterator iter = detections.begin(); iter != detections.end(); ++iter)
-    {
+    {	
         if (MARKERS.find(iter->id) != MARKERS.end())
         {
+			m_numMarkerDetected.data += 1;
             m_LastMarkerDetected = iter->id;
+
 
             //Cálculo de extrínsecos
             cv::Mat imgPoints(4,2,CV_32FC1);
@@ -879,6 +885,7 @@ CameraManager::ProcessImage(cv::Mat& image)
     return result;
 }
 
+
 cv::Point2f
 CameraManager::GetRealProjectedPoint(CvPoint3D32f point)
 {
@@ -892,6 +899,10 @@ CameraManager::GetRealProjectedPoint(CvPoint3D32f point)
     imgPoint = DrawingUtils::opticas2Graficas(imgPoint.x, imgPoint.y, m_RealCamera.rows, m_RealCamera.columns);
 
     return cv::Point2f(imgPoint.x, imgPoint.y);
+}
+std_msgs::Int8 CameraManager::getNumMarkersDetected()
+{
+	return m_numMarkerDetected;
 }
 
 cv::Point2f

@@ -21,7 +21,11 @@ Then, you have the installed component and you can launch it.
 # USAGE
 To launch this component you need some files:
 - "markers.txt": This file contains the pose markers to localizate the sensor
-- config.yml: This file contains the information to receive the camera information (ICE proxy or ROS topic) and to publish the estimate pose 3d(ICE or ROS topic).
+- configuration.yml: This file contains the following information:
+	- The camera information (ICE proxy or ROS topic): 
+	- The ICE proxy or ROS topic)  to publish the estimate pose 3d
+	- The ROS topic to publish the number of detected markers.
+	- The ROS topic to publish the time in which publish the estimated pose.
 - sim_calib.yml: this file contains the calibration parameters of the camera.
 > IMPORTANT: I have calibrated the camera with the fool from jderobot, so if you use other you have to change the names to camera_matrix and distortion_coefficients.
 

@@ -1,7 +1,7 @@
 #include "threadgui.h"
 #include <QDesktopWidget>
 
-threadGUI::threadGUI(Sensors* sensors,int option, std::string topic ,std::string calib_filename)
+threadGUI::threadGUI(Sensors* sensors,int option, std::string topic_pose,std::string topic_timer,std::string topic_numMarker ,std::string calib_filename)
 {
     gui = new MainWindow();
     //Centramos la ventana en la pantalla
@@ -12,7 +12,9 @@ threadGUI::threadGUI(Sensors* sensors,int option, std::string topic ,std::string
 
     int screenWidth = wid.screen()->width();
     int screenHeight = wid.screen()->height();
-	gui->setOption(option, topic);
+	gui->setOption(option, topic_pose);
+	gui->setTimerPublisherROS(topic_timer);
+	gui->setNumMarkerPublisher(topic_numMarker);
     gui->setGeometry((screenWidth/2)-(width/2),(screenHeight/2)-(height/2),width,height);
     gui->setSensors(sensors);
 	gui->setCalibFile(calib_filename);

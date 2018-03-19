@@ -7,6 +7,8 @@
 #include "markerinfo.h"
 #include <progeo/progeo.h>
 #include <aruco/aruco.h>
+#include "ros/ros.h"
+#include <std_msgs/Int8.h>
 
 #if USE_APRIL_TAGS_C_LIBRARY
 #include "april_tags/apriltag.h"
@@ -37,6 +39,7 @@ namespace Ardrone
         std::map<int, cv::Mat> m_DetectedMarkerPoints;
         int m_LastMarkerDetected;
 		std::string m_mapfile;
+		std_msgs::Int8 m_numMarkerDetected;
 		
 
         //###
@@ -87,6 +90,7 @@ namespace Ardrone
         void SetRealPose(double x, double y, double z, double h, double roll, double pitch, double yaw);
         void SetEstimatedPose(double x, double y, double z, double h, double roll, double pitch, double yaw);
         void SetEstimatedPose(const Eigen::Matrix4d& rt);
+		std_msgs::Int8 getNumMarkersDetected();
         //#####
         void setBalPoses(double x, double y, double z, double h, double roll, double pitch, double yaw);
         std::vector<TPinHoleCamera, Eigen::aligned_allocator<TPinHoleCamera> >& GetBalCameras();

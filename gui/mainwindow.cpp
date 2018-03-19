@@ -114,6 +114,8 @@ MainWindow::updateThreadGUI()
                 m_CameraManager->SetEstimatedPose(p.GetX(), p.GetY(), p.GetZ(), p.GetH(), p.GetRoll(), p.GetPitch(), p.GetYaw());
                 printf("--- %03f %03f %03f ---\n", p.GetX(), p.GetY(), p.GetZ());
 		
+		numMarkers = m_CameraManager->getNumMarkersDetected();
+
 
 		if (m_option == 2)
 		{
@@ -125,6 +127,15 @@ MainWindow::updateThreadGUI()
 		{
         sharer->setPose3D(m_CameraManager->GetEstimatedPose(), 1);
 		}
+
+
+		//publish num markers detected
+		m_NumMarkerROS->setNumMarker(numMarkers);
+
+		//publish time
+		double t = ros::Time::now().toSec();
+		m_TimerROS->setTime(t);
+		
     }
     else
     {	
@@ -138,10 +149,10 @@ MainWindow::updateThreadGUI()
 			{
 		    sharer->setPose3D(m_CameraManager->GetEstimatedPose(), 0);
 			}
-		
+		//publish num markers detected
+		numMarkers.data = 0;
+		m_NumMarkerROS->setNumMarker(numMarkers);
 
-        //m_KalmanFilter->Reset();
-        //m_WeightedAverageFilter->Reset();
     }
 
     if (ui->realMarkerChk->isChecked())
@@ -191,6 +202,30 @@ void MainWindow::setOption(int option, std::string topic)
 
 
 }
+
+
+void MainWindow::setNumMarkerPublisher(std::string topic)
+{
+
+	m_NumMarkerROS = new numMarkerPublisherROS(topic);
+
+
+}
+
+void MainWindow::setTimerPublisherROS(std::string topic)
+{
+	m_TimerROS = new timerPublisherROS(topic);
+
+
+}
+
+
+
+
+
+
+
+
 
 void MainWindow::setCalibFile(std::string calib_filename)
 {
