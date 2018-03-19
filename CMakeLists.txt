@@ -261,7 +261,7 @@ INSTALL (FILES
 	${CMAKE_CURRENT_SOURCE_DIR}/resources/ardrone_slam.glade
 	${CMAKE_CURRENT_SOURCE_DIR}/resources/introrob.glade
 	${CMAKE_CURRENT_SOURCE_DIR}/resources/markers.txt
-	${CMAKE_CURRENT_SOURCE_DIR}/resources/configuration.cfg
+	${CMAKE_CURRENT_SOURCE_DIR}/resources/configuration.yml
 	${CMAKE_CURRENT_SOURCE_DIR}/resources/sim_calib.yml
 	DESTINATION
 	${CMAKE_INSTALL_PREFIX}/share/jderobot/conf
