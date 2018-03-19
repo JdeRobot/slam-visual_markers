@@ -13,7 +13,7 @@
 class threadGUI : public QThread
 {
 public:
-    threadGUI(Sensors* sensors,int option, std::string topic ,std::string calib_filename);
+    threadGUI(Sensors* sensors,int option, std::string topic_pose,std::string topic_timer,std::string topic_numMarker ,std::string calib_filename);
 
 private:
     MainWindow* gui;

@@ -14,6 +14,8 @@
 #include <QLineEdit>
 #include "sharer.h"
 #include "rosPublisher.h"
+#include "numMarkerPublisherROS.h"
+#include "timerPublisherROS.h"
 
 
 namespace Ui {
@@ -40,10 +42,13 @@ private:
     Eigen::Matrix4d m_RT;
     Sharer *sharer;
 	rosPublisher *myPublisher;
+	timerPublisherROS *m_TimerROS;
+	numMarkerPublisherROS *m_NumMarkerROS;
 
 	int m_option; //ICE or ROS
 	std::string m_topic;
 	std::string m_calibFile;
+	std_msgs::Int8 numMarkers;
 
 
 
@@ -55,6 +60,8 @@ public:
 
     void setSensors(Sensors* sensors);
 	void setOption(int option, std::string);
+	void setNumMarkerPublisher(std::string topic);
+	void setTimerPublisherROS(std::string topic);
 	void setCalibFile(std::string calib_filename);
 
     void updateThreadGUI();

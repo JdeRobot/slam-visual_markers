@@ -31,7 +31,7 @@ int main(int argc, char *argv[])
 
     QApplication a(argc, argv);
 
-
+	ros::init(argc, argv, "visual_marker");
 		
 	
     try
@@ -40,16 +40,18 @@ int main(int argc, char *argv[])
 		Config::Properties props = Config::load(argc, argv);	
         Comm::Communicator* jdrc = new Comm::Communicator(props);
 
-		int serverPose=props.asInt("CamAutoloc.Pose3D.Server");
-		std::string topic = props.asString("CamAutoloc.Pose3D.Topic");
+		int serverPose=props.asInt("VisualMarkers.Pose3D.Server");
+		std::string topic_pose = props.asString("VisualMarkers.Pose3D.Topic");
+		std::string topic_numMarker = props.asString("VisualMarkers.NumMarker.Topic");
+		std::string topic_Timer = props.asString("VisualMarkers.Timer.Topic");
 		std::string calib_filename = argv[2];
 		ros::Publisher pub;
 
 		if (serverPose == 1)
 		{
-			// Publish Pose3d with ROS
+			// Publish Pose3d with ICE
 
-			std::string endpoint = props.asString("CamAutoloc.Pose3D.Proxy");		
+			std::string endpoint = props.asString("VisualMarkers.Pose3D.Proxy");		
 			std::cout<<"You have selected ICE to publish the estimated pose:\n"<<endpoint<<std::endl;
 			Ice::CommunicatorPtr ic;
 			ic = Ice::initialize(argc, argv);
@@ -62,15 +64,12 @@ int main(int argc, char *argv[])
 
 
 		}
-		else
-		{
-			ros::init(argc, argv, "slam_markers");
-		}
+	
 		
 
 
         Sensors* sensors = new Sensors(jdrc);
-        threadGUI* gui = new threadGUI(sensors,serverPose,topic,calib_filename);
+        threadGUI* gui = new threadGUI(sensors,serverPose,topic_pose,topic_Timer,topic_numMarker,calib_filename);
         ThreadSensors* threadSensors = new ThreadSensors(sensors);
 
         threadSensors->start();
