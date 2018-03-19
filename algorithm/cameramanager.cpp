@@ -7,6 +7,8 @@
 #endif
 #include "drawingutils.h"
 #include <fstream>
+#include <iostream>
+#include "opencv2/opencv.hpp"
 
 //#define MARKER_SIZE 0.17
 //#define HALF_MARKER_SIZE 0.085
@@ -20,13 +22,18 @@ namespace Ardrone
 
 using namespace Ardrone;
 
-CameraManager::CameraManager(/*int rows, int columns, */const std::string& calibFile, double foaX, double foaY, double foaZ)
-{
-    //Calibración
-    m_CameraParameters.readFromXMLFile(calibFile);
-    //m_CameraParameters.resize(cv::Size(columns, rows));
 
-    //Cámara real
+CameraManager::CameraManager(/*int rows, int columns, */const std::string& calibFile,double foaX, double foaY, double foaZ)
+{
+
+
+    //Matriz de parámetros intrínsecos
+    ifstream file(calibFile);
+    
+	if (!file)	//no utilizamos el archivo de calibracion
+    {
+ 	//Cámara real
+	std::cout<<"Usamos los parametros por defecto"<<std::endl;
     m_RealCamera.position.X = 0.0;
     m_RealCamera.position.Y = 0.0;
     m_RealCamera.position.Z = 0.0;
@@ -36,16 +43,16 @@ CameraManager::CameraManager(/*int rows, int columns, */const std::string& calib
     m_RealCamera.foa.Z = 0.0;
     m_RealCamera.foa.H = 1.0;
     m_RealCamera.roll = 0.0;
-    m_RealCamera.fdistx = m_CameraParameters.CameraMatrix.at<float>(0,0);
-    m_RealCamera.fdisty = m_CameraParameters.CameraMatrix.at<float>(1,1);
-    m_RealCamera.u0 = m_CameraParameters.CameraMatrix.at<float>(0,2);
-    m_RealCamera.v0 = m_CameraParameters.CameraMatrix.at<float>(1,2);
+    m_RealCamera.fdistx = 187.336;
+    m_RealCamera.fdisty = 187.336;
+    m_RealCamera.u0 = 160;
+    m_RealCamera.v0 = 120;
     m_RealCamera.skew = 0.0;
-    m_RealCamera.rows = m_CameraParameters.CamSize.height;
-    m_RealCamera.columns = m_CameraParameters.CamSize.width;
+    m_RealCamera.rows = 240;
+    m_RealCamera.columns = 320;
     update_camera_matrix(&m_RealCamera);
 
-    //Cámara estimada
+    //Cámara estimada (Parámetros simulación gazebo)
     m_EstimatedCamera.position.X = 0.0;
     m_EstimatedCamera.position.Y = 0.0;
     m_EstimatedCamera.position.Z = 0.0;
@@ -55,47 +62,111 @@ CameraManager::CameraManager(/*int rows, int columns, */const std::string& calib
     m_EstimatedCamera.foa.Z = 0.0;
     m_EstimatedCamera.foa.H = 1.0;
     m_EstimatedCamera.roll = 0.0;
-    m_EstimatedCamera.fdistx = m_CameraParameters.CameraMatrix.at<float>(0,0);
-    m_EstimatedCamera.fdisty = m_CameraParameters.CameraMatrix.at<float>(1,1);
-    m_EstimatedCamera.u0 = m_CameraParameters.CameraMatrix.at<float>(0,2);
-    m_EstimatedCamera.v0 = m_CameraParameters.CameraMatrix.at<float>(1,2);
+    m_EstimatedCamera.fdistx = 187.336;
+    m_EstimatedCamera.fdisty = 187.336;
+    m_EstimatedCamera.u0 = 160;
+    m_EstimatedCamera.v0 = 120;
     m_EstimatedCamera.skew = 0.0;
-    m_EstimatedCamera.rows = m_CameraParameters.CamSize.height;
-    m_EstimatedCamera.columns = m_CameraParameters.CamSize.width;
+    m_EstimatedCamera.rows = 240;
+    m_EstimatedCamera.columns = 320;
     update_camera_matrix(&m_EstimatedCamera);
 
-    //Matriz de parámetros intrínsecos
-    double cam[] = { m_CameraParameters.CameraMatrix.at<float>(0,0), m_CameraParameters.CameraMatrix.at<float>(0,1), m_CameraParameters.CameraMatrix.at<float>(0,2),
-                      m_CameraParameters.CameraMatrix.at<float>(1,0), m_CameraParameters.CameraMatrix.at<float>(1,1), m_CameraParameters.CameraMatrix.at<float>(1,2),
-                      m_CameraParameters.CameraMatrix.at<float>(2,0), m_CameraParameters.CameraMatrix.at<float>(2,1), m_CameraParameters.CameraMatrix.at<float>(2,2)};
+
+
+
+
+
+
+    double cam[] = { 187.336, 0, 160,
+                      0, 187.336, 120,
+                      0, 0, 1};
     cv::Mat auxMat(3, 3, CV_64FC1, cam);
     auxMat.copyTo(m_CameraMatrix);
 
-    m_K(0,0) = m_CameraParameters.CameraMatrix.at<float>(0,0);
-    m_K(0,1) = m_CameraParameters.CameraMatrix.at<float>(0,1);
-    m_K(0,2) = m_CameraParameters.CameraMatrix.at<float>(0,2);
-    m_K(1,0) = m_CameraParameters.CameraMatrix.at<float>(1,0);
-    m_K(1,1) = m_CameraParameters.CameraMatrix.at<float>(1,1);
-    m_K(1,2) = m_CameraParameters.CameraMatrix.at<float>(1,2);
-    m_K(2,0) = m_CameraParameters.CameraMatrix.at<float>(2,0);
-    m_K(2,1) = m_CameraParameters.CameraMatrix.at<float>(2,1);
-    m_K(2,2) = m_CameraParameters.CameraMatrix.at<float>(2,2);
+    m_K(0,0) = 187.336;
+    m_K(0,1) = 0;
+    m_K(0,2) = 0;
+    m_K(1,0) = 0;
+    m_K(1,1) = 187.336;
+    m_K(1,2) = 120;
+    m_K(2,0) = 0;
+    m_K(2,1) = 0;
+    m_K(2,2) = 1;
+    
 
-    /***************************************************************************************************************************************/
-//    printf("--- %.3f %.3f %.3f %.3f ---\n", m_EstimatedCamera.k11, m_EstimatedCamera.k12, m_EstimatedCamera.k13, m_EstimatedCamera.k14);
-//    printf("--- %.3f %.3f %.3f %.3f ---\n", m_EstimatedCamera.k21, m_EstimatedCamera.k22, m_EstimatedCamera.k23, m_EstimatedCamera.k24);
-//    printf("--- %.3f %.3f %.3f %.3f ---\n\n", m_EstimatedCamera.k31, m_EstimatedCamera.k32, m_EstimatedCamera.k33, m_EstimatedCamera.k34);
 
-//    printf("--- %.3f %.3f %.3f ---\n", m_K(0,0), m_K(0,1), m_K(0,2));
-//    printf("--- %.3f %.3f %.3f ---\n", m_K(1,0), m_K(1,1), m_K(1,2));
-//    printf("--- %.3f %.3f %.3f ---\n\n", m_K(2,0), m_K(2,1), m_K(2,2));
-//    abort();
-    /***************************************************************************************************************************************/
-
-    //Matriz de parámetros de distorsión (TODO: Sacar de calibración)
     double dis[] = {0.0, 0.0, 0.0, 0.0, 0.0};
     cv::Mat distCoeffs(5, 1 ,CV_64FC1, dis);
     distCoeffs.copyTo(m_DistortionCoeffs);
+    }
+    else //usamos archivo calibracion
+
+    {	
+	std::cout<<"Usamos el archivo de calibracion: "<<calibFile<<std::endl;
+    cv::FileStorage fs(calibFile, cv::FileStorage::READ);
+    cv::Mat cameraMatrix, distCoeffs;
+    fs["camera_matrix"] >> cameraMatrix;
+    fs["distortion_coefficients"] >> distCoeffs;
+    cameraMatrix.copyTo(m_CameraMatrix);
+ 	
+    m_K(0,0) = cameraMatrix.at<double>(0,0);
+    m_K(0,1) = cameraMatrix.at<double>(0,1);
+    m_K(0,2) = cameraMatrix.at<double>(0,2);
+    m_K(1,0) = cameraMatrix.at<double>(1,0);
+    m_K(1,1) = cameraMatrix.at<double>(1,1);
+    m_K(1,2) = cameraMatrix.at<double>(1,2);
+    m_K(2,0) = cameraMatrix.at<double>(2,0);
+    m_K(2,1) = cameraMatrix.at<double>(2,1);
+    m_K(2,2) = cameraMatrix.at<double>(2,2);
+ 
+    distCoeffs.copyTo(distCoeffs);
+     
+
+	//Cámara real
+
+    m_RealCamera.position.X = 0.0;
+    m_RealCamera.position.Y = 0.0;
+    m_RealCamera.position.Z = 0.0;
+    m_RealCamera.position.H = 1.0;
+    m_RealCamera.foa.X = 0.0;
+    m_RealCamera.foa.Y = 0.0;
+    m_RealCamera.foa.Z = 0.0;
+    m_RealCamera.foa.H = 1.0;
+    m_RealCamera.roll = 0.0;
+    m_RealCamera.fdistx = m_K(0,0);
+    m_RealCamera.fdisty = m_K(1,1);
+    m_RealCamera.u0 = m_K(0,2);
+    m_RealCamera.v0 = m_K(1,2);
+    m_RealCamera.skew = 0.0;
+    m_RealCamera.rows =  fs["image_height"];
+    m_RealCamera.columns = fs["image_width"];
+    update_camera_matrix(&m_RealCamera);
+
+    //Cámara estimada (Parámetros simulación gazebo)
+    m_EstimatedCamera.position.X = 0.0;
+    m_EstimatedCamera.position.Y = 0.0;
+    m_EstimatedCamera.position.Z = 0.0;
+    m_EstimatedCamera.position.H = 1.0;
+    m_EstimatedCamera.foa.X = 0.0;
+    m_EstimatedCamera.foa.Y = 0.0;
+    m_EstimatedCamera.foa.Z = 0.0;
+    m_EstimatedCamera.foa.H = 1.0;
+    m_EstimatedCamera.roll = 0.0;
+    m_EstimatedCamera.fdistx = m_K(0,0);
+    m_EstimatedCamera.fdisty = m_K(1,1);
+    m_EstimatedCamera.u0 = m_K(0,2);
+    m_EstimatedCamera.v0 = m_K(1,2);
+    m_EstimatedCamera.skew = 0.0;
+    m_EstimatedCamera.rows = fs["image_height"];
+    m_EstimatedCamera.columns = fs["image_width"];
+    update_camera_matrix(&m_EstimatedCamera);
+
+
+
+    
+    }
+
+    
 
     //Foco de atención "base"
     m_BaseFoaX = foaX;
@@ -149,6 +220,8 @@ CameraManager::GetMarkerSize()
 {
     double result;
 
+
+
     std::ifstream file("markers.txt");
     std::string line;
     std::getline(file, line);
@@ -183,6 +256,7 @@ CameraManager::BuildMarkers()
 //    result[4] = new MarkerInfo(4, 2.0f, 0.0f, 0.5f, 0, -CV_PI/8, -CV_PI/2, MARKER_SIZE);
 //    //Real world
 //    result[0] = new MarkerInfo(0, 1.5f, 0.0f, 0.6f, CV_PI/2, 0, CV_PI, MARKER_SIZE);
+
 
     std::ifstream file("markers.txt");
     std::string line;
@@ -277,17 +351,44 @@ CameraManager::GetWeight(double distance)
 
     double result = 0.0;
 
-    if ((distance <= 2) && (distance > 0))
+    if ((distance <= 1) && (distance > 0))
     {
-        result = 2.0;
+        result = 1.4;
+    }
+    if ((distance <= 2) && (distance > 1))
+    {
+        result = 1.1;
     }
     else if((distance <= 3) && (distance > 2))
     {
-        result = 0.8;
+        result = 0.5;
     }
     else if((distance <= 10) && (distance > 3))
     {
-        result = 0.3;
+        result = 0.2;
+    }
+
+    return result;
+}
+
+double
+CameraManager::GetWeightPose(double distance)
+{
+    //TODO Ajustar los pesos
+
+    double result = 0.0;
+
+    if ((distance <= 0.5) && (distance > 0))
+    {
+        result = 1.3;
+    }
+    else if((distance <= 1) && (distance > 0.5))
+    {
+        result = 0.9;
+    }
+    else if(distance > 1)
+    {
+        result = 0.2;
     }
 
     return result;
@@ -304,6 +405,19 @@ CameraManager::GetEstimatedCamera()
 {
     return m_EstimatedCamera;
 }
+
+std::vector<TPinHoleCamera, Eigen::aligned_allocator<TPinHoleCamera> >&
+CameraManager::GetBalCameras()
+{
+    return m_BalCameras;
+}
+
+std::vector<Pose, Eigen::aligned_allocator<Pose> >&
+CameraManager::GetBalPoses()
+{
+    return m_BalPoses;
+}
+
 
 const Eigen::Matrix3d&
 CameraManager::GetIntrinsicsMatrix()
@@ -368,6 +482,8 @@ CameraManager::GetLastMarkerDetected()
     return m_LastMarkerDetected;
 }
 
+
+
 void
 CameraManager::SetRealPose(double x, double y, double z, double h, double roll, double pitch, double yaw)
 {
@@ -398,6 +514,27 @@ CameraManager::SetEstimatedPose(double x, double y, double z, double h, double r
     UpdateCameraExtrinsics(m_EstimatedCamera, m_EstimatedPose.GetRT().inverse().eval());
 }
 
+
+/*
+void
+CameraManager::SetBalPoses(double x, double y, double z, double h, double roll, double pitch, double yaw)
+{
+
+    Pose* p = new Pose(x, y, z, h, roll, pitch, yaw);
+    p->Update(x, y, z, h, roll, pitch, yaw);
+    m_BalPoses.push_back(p);
+    m_EstimatedCamera.position.X = p.GetX();
+    m_EstimatedCamera.position.Y = p.GetY();
+    m_EstimatedCamera.position.Z = p.GetZ();
+    m_EstimatedCamera.position.H = h;
+    m_EstimatedCamera.foa.X = p.GetFoaX();
+    m_EstimatedCamera.foa.Y = p.GetFoaY();
+    m_EstimatedCamera.foa.Z = p.GetFoaZ();
+    m_EstimatedCamera.foa.H = p.GetFoaH();
+    UpdateCameraExtrinsics(m_EstimatedCamera, p.GetRT().inverse().eval());
+}
+*/
+
 void
 CameraManager::SetEstimatedPose(const Eigen::Matrix4d& rt)
 {
@@ -412,6 +549,8 @@ CameraManager::SetEstimatedPose(const Eigen::Matrix4d& rt)
     m_EstimatedCamera.foa.H = m_EstimatedPose.GetFoaH();
     UpdateCameraExtrinsics(m_EstimatedCamera, m_EstimatedPose.GetRT().inverse().eval());
 }
+
+
 
 bool
 CameraManager::ProcessImage(cv::Mat& image)
@@ -511,6 +650,23 @@ CameraManager::ProcessImage(cv::Mat& image)
     zarray_destroy(detections);
 
 #else
+
+
+
+
+
+    // COSA MÍA
+    std::vector<float> PosVect(3,.0);
+    int npos = 0;
+
+    m_BalPoses.clear();
+    m_BalCameras.clear();
+    TPinHoleCamera BalCam = m_EstimatedCamera;
+
+
+
+
+
     cv::Mat imageGray;
     cv::cvtColor(image, imageGray, CV_BGR2GRAY);
     std::vector<AprilTags::TagDetection> detections = m_TagDetector->extractTags(imageGray);
@@ -607,17 +763,43 @@ CameraManager::ProcessImage(cv::Mat& image)
             /******************************************************************************************/
 
             Pose* p = new Pose(x, y, z, h, roll, pitch, yaw);
+
+
+            //COSA MÍA
+            PosVect[0] += x;
+            PosVect[1] += y;
+            PosVect[2] += z;
+            npos += 1;
+            m_BalPoses.push_back(*p);
+
             p->SetWeight(GetWeight(Ardrone::GeometryUtils::GetDistance(tvec.at<float>(0,0), tvec.at<float>(1,0), tvec.at<float>(2,0))));
             poses.push_back(p);
-
+//setBalPoses(x, y, z, h, roll, pitch, yaw);
             //SetEstimatedPose(RT_WC);
         }
     }
 
 #endif
 
+
+
+    //#################################
+    // "poses" TIENE LAS POSICIONES DETECTADAS POR CADA BALIZA
+
     if (!poses.empty())
     {
+
+
+        //COSAMÍA
+        //CALCULAR POSICIÓN MEDIA
+        PosVect[0] /= npos;
+        PosVect[1] /= npos;
+        PosVect[2] /= npos;
+        printf("#MEAN VECTOR %.3f, %.3f, %.3f\n",PosVect[0], PosVect[1], PosVect[2]);
+        double newwgt = 0.0;
+        int posSize = poses.size();
+
+
         result = true;
 
         double posX = 0.0;
@@ -630,8 +812,32 @@ CameraManager::ProcessImage(cv::Mat& image)
         double sum1Yaw = 0.0;
         double sum2Yaw = 0.0;
         double acum = 0.0;
+        double poseDist = 0.0;
         for (std::vector<Pose*>::iterator iter = poses.begin(); iter != poses.end(); ++iter)
         {
+
+            //COSAMÍA
+            //*
+
+            if (!(posSize < 3)) {
+
+                poseDist = Ardrone::GeometryUtils::GetDistance((*iter)->GetX() - PosVect[0],
+                        (*iter)->GetY() - PosVect[1],
+                        (*iter)->GetZ() - PosVect[2]);
+                printf("POSE DIST : %f \n", poseDist);
+                printf("PESOS (dist, mean): %f , %f \n", (*iter)->GetWeight(), GetWeightPose(poseDist) );
+                newwgt = (*iter)->GetWeight()*GetWeightPose(poseDist);
+                printf("PESO FINAL: %F \n", newwgt );
+                (*iter)->SetWeight(newwgt);
+                /*Se calcula distancia de cada pose con respecto a la media y se asigna un nuevo
+                 * peso según la cercanía a la posición media de las estimaciones.
+                 * Total Weight = DistWeight * MediaWeight
+                 * Max weight: 1.96, min weight: ~0;
+                 * La cercanía a la estimación media tiene más peso que la distancia a la baliza */
+
+                //TODO: CÁLCULO DE ERROR EN ÁNGULOS
+            }
+
             posX += (*iter)->GetWeight()*(*iter)->GetX();
             posY += (*iter)->GetWeight()*(*iter)->GetY();
             posZ += (*iter)->GetWeight()*(*iter)->GetZ();
@@ -645,6 +851,21 @@ CameraManager::ProcessImage(cv::Mat& image)
 
             acum += (*iter)->GetWeight();
 
+
+            //MIO
+            BalCam.position.X =(*iter)->GetX();
+            BalCam.position.Y = (*iter)->GetY();
+            BalCam.position.Z = (*iter)->GetZ();
+            BalCam.position.H = 1;
+            BalCam.foa.X = (*iter)->GetFoaX();
+            BalCam.foa.Y = (*iter)->GetFoaY();
+            BalCam.foa.Z = (*iter)->GetFoaZ();
+            BalCam.foa.H = (*iter)->GetFoaH();
+            UpdateCameraExtrinsics(BalCam, (*iter)->GetRT().inverse().eval());
+
+            m_BalCameras.push_back(BalCam);
+            //
+
             //printf("- %.3f, %.3f, %.3f, %.3f\n", (*iter)->GetX(), (*iter)->GetY(), (*iter)->GetZ(), (*iter)->GetYaw());
 
             delete *iter;
@@ -652,9 +873,9 @@ CameraManager::ProcessImage(cv::Mat& image)
         SetEstimatedPose(posX/acum, posY/acum, posZ/acum, 1, atan2(sum1Roll, sum2Roll), atan2(sum1Pitch, sum2Pitch), atan2(sum1Yaw, sum2Yaw));
 
         //Pose calculada
-        //printf("# %.3f, %.3f, %.3f -- %.3f, %.3f, %.3f\n", m_EstimatedPose.GetX(), m_EstimatedPose.GetY(), m_EstimatedPose.GetZ(), m_EstimatedPose.GetRoll(), m_EstimatedPose.GetPitch(), m_EstimatedPose.GetYaw());
+        printf("# %.3f, %.3f, %.3f -- %.3f, %.3f, %.3f\n", m_EstimatedPose.GetX(), m_EstimatedPose.GetY(), m_EstimatedPose.GetZ(), m_EstimatedPose.GetRoll(), m_EstimatedPose.GetPitch(), m_EstimatedPose.GetYaw());
     }
-
+    printf("#######\n");
     return result;
 }
 
@@ -705,6 +926,7 @@ CameraManager::GetCornerDiffs(int id)
 
     return result;
 }
+
 
 void
 CameraManager::DrawRealPoint(cv::Mat& image, CvPoint3D32f point, cv::Scalar color)

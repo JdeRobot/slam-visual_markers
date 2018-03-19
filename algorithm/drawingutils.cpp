@@ -4,6 +4,7 @@
 #include <glut.h>
 
 using namespace Ardrone;
+using namespace cv;
 
 HPoint2D
 DrawingUtils::graficas2Opticas(double i, double j, double rows, double columns)
@@ -105,6 +106,7 @@ DrawingUtils::drawCamera(const TPinHoleCamera& cam, CvPoint3D32f color, const Ei
     drawLine(cvPoint3D32f(aux8.X, aux8.Y, aux8.Z), cvPoint3D32f(aux6.X, aux6.Y, aux6.Z), 2.0f, color);
     drawLine(cvPoint3D32f(aux6.X, aux6.Y, aux6.Z), cvPoint3D32f(aux2.X, aux2.Y, aux2.Z), 2.0f, color);
 }
+
 
 HPoint2D
 DrawingUtils::myproject(HPoint3D point, const Eigen::Matrix3d& K, const Eigen::Matrix4d& RT)

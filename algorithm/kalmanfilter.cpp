@@ -39,7 +39,7 @@ KalmanFilter::KalmanFilter()
     }
 
     //Relación entre estado actual y el anterior (por ahora posición: s = v*t)
-    m_Dt = 0.1;
+    m_Dt = 0.08;
     m_A = Eigen::MatrixXd::Identity(stateSize, stateSize);
 #if !_ONLY_POSITION_
     m_A(0,6) = m_Dt;
@@ -59,7 +59,7 @@ KalmanFilter::KalmanFilter()
     m_H = Eigen::MatrixXd::Identity(stateSize/2, stateSize);
 
     //Ruido del proceso
-    double q = 0.1;
+    double q = 0.01;
     m_Q = q*m_I;
 
     //Ruido de la medida
@@ -114,7 +114,7 @@ KalmanFilter::GetFilteredPose(const Pose& zpose)
     xhatminus(4) = GeometryUtils::StandardRad(xhatminus(4));
     xhatminus(5) = GeometryUtils::StandardRad(xhatminus(5));
     /******************************************************************/
-    Eigen::MatrixXd Pminus = m_A*m_P*m_A.transpose() + m_Q;
+    Eigen::MatrixXd Pminus = m_A*(m_P*m_A.transpose()) + m_Q;
 
     //Medida
 #if !_ONLY_POSITION_

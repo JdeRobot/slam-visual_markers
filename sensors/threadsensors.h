@@ -8,7 +8,7 @@
 
 #include "sensors.h"
 
-#define cycle_control 40 //miliseconds
+#define cycle_control 50 //miliseconds
 
 class ThreadSensors:public QThread
 {

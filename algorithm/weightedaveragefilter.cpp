@@ -11,6 +11,10 @@ WeightedAverageFilter::WeightedAverageFilter(unsigned int size)
     for (unsigned int i = 0; i < m_Size; ++i)
     {
         double w = (double)(i+1)/(double)m_Size;
+        if (w == 1.0){
+            w += 1;
+            //Da un punto más de peso a la última posición
+        }
         m_Weights.push_back(w);
         sum += w;
         m_Sumatories.push_back(sum);
