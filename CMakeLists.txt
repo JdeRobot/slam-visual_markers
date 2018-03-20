@@ -282,6 +282,10 @@ set_property(TARGET Aruco PROPERTY IMPORTED_LOCATION
 add_library(Glog SHARED IMPORTED)
 set_property(TARGET Glog PROPERTY IMPORTED_LOCATION
 			"/usr/lib/x86_64-linux-gnu/libglog.so")
+# ROS
+add_library(roscpp SHARED IMPORTED)
+set_property(TARGET roscpp PROPERTY IMPORTED_LOCATION
+			"/opt/ros/kinetic/lib/libroscpp.so")
 
 
 target_link_libraries(cam_autoloc
