@@ -327,6 +327,7 @@ target_link_libraries(cam_autoloc
 			libeasyiceconfig
 libjderobotHandlers
 						    ${Boost_LIBRARIES} 
+						    roscpp
 )
 
 INSTALL (FILES 
