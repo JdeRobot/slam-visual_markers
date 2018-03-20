@@ -24,6 +24,7 @@ find_package(GLUT REQUIRED)
 #find_package(glog REQUIRED)
 find_package(OpenCV)
 find_package(Ice)
+find_package(catkin REQUIRED COMPONENTS roscpp std_msgs)
 
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${Qt5Widgets_EXECUTABLE_COMPILE_FLAGS}  ${Qt5Core_EXECUTABLE_COMPILE_FLAGS} ${Qt5Gui_EXECUTABLE_COMPILE_FLAGS} ${Qt5Svg_EXECUTABLE_COMPILE_FLAGS} -std=c++11 ")
@@ -286,6 +287,10 @@ set_property(TARGET Glog PROPERTY IMPORTED_LOCATION
 add_library(roscpp SHARED IMPORTED)
 set_property(TARGET roscpp PROPERTY IMPORTED_LOCATION
 			"/opt/ros/kinetic/lib/libroscpp.so")
+			
+add_library(librosconsole SHARED IMPORTED)
+set_property(TARGET librosconsole PROPERTY IMPORTED_LOCATION
+			"/opt/ros/kinetic/lib/librosconsole.so")
 
 
 target_link_libraries(cam_autoloc
@@ -327,7 +332,10 @@ target_link_libraries(cam_autoloc
 			libeasyiceconfig
 libjderobotHandlers
 						    ${Boost_LIBRARIES} 
-						    roscpp
+			#ROS
+			roscpp
+			
+			${catkin_LIBRARIES}
 )
 
 INSTALL (FILES 
