@@ -162,6 +162,8 @@ include_directories(	${Qt5Widgets_INCLUDES}
 			${GLUT_INCLUDE_DIRS}
 			${OPENGL_INCLUDE_DIRS} 
 			${JDE_INCLUDE_DIRS}
+			# ROS
+			/opt/ros/kinetic/include
 
 			#GLUT_DIRECTORY
 			/usr/include/GL
