@@ -1,4 +1,4 @@
-project( slam_markers )
+project( cam_autoloc )
 cmake_minimum_required( VERSION 2.8.7 )
 
 
@@ -10,7 +10,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(QMAKE_CXXFLAGS "-std=c++11")
 
 #required modules
-#find_package(Qt5Widgets REQUIRED)
+find_package(Qt5Widgets REQUIRED)
 find_package(PkgConfig)
 
 #Version
@@ -18,16 +18,12 @@ pkg_check_modules(GTKMM gtkmm-2.4)
 pkg_check_modules(GTKGLEXTMM gtkglextmm-1.2) 
 pkg_check_modules(LIBGLADEMM libglademm-2.4)
 pkg_check_modules(LIBGNOMECANVASMM libgnomecanvasmm-2.6)
-find_package( ZLIB REQUIRED )
-find_package(catkin REQUIRED 
-COMPONENTS
-roscpp
-geometry_msgs)
 
-#find_package(OpenGL REQUIRED) 
+find_package(OpenGL REQUIRED) 
 find_package(GLUT REQUIRED)
-#find_package(OpenCV)
-#find_package(Ice)
+#find_package(glog REQUIRED)
+find_package(OpenCV)
+find_package(Ice)
 
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${Qt5Widgets_EXECUTABLE_COMPILE_FLAGS}  ${Qt5Core_EXECUTABLE_COMPILE_FLAGS} ${Qt5Gui_EXECUTABLE_COMPILE_FLAGS} ${Qt5Svg_EXECUTABLE_COMPILE_FLAGS} -std=c++11 ")
@@ -38,9 +34,6 @@ set(SOURCES_FILES 	sensors/threadsensors.cpp
 		        gui/mainwindow.cpp
 		        src/main.cpp
 		        sensors/sensors.cpp
-				algorithm/rosPublisher.cpp
-				algorithm/numMarkerPublisherROS.cpp
-				algorithm/timerPublisherROS.cpp
 			gui/threadgui.cpp 
 			sensors/sensors.cpp 
 			sensors/threadsensors.cpp 
@@ -89,9 +82,6 @@ set(HEADERS 		sensors/threadsensors.h
 			sensors/sensors.h
                 	gui/threadgui.h
                 	gui/mainwindow.h
-					algorithm/rosPublisher.h
-				algorithm/numMarkerPublisherROS.h
-				algorithm/timerPublisherROS.h
 			gui/threadgui.h
 			AprilTags/april_tags/apriltag.h 
 			AprilTags/april_tags/zhash.h 
@@ -166,7 +156,6 @@ include_directories(	${Qt5Widgets_INCLUDES}
 			${GLUT_INCLUDE_DIRS}
 			${OPENGL_INCLUDE_DIRS} 
 			${JDE_INCLUDE_DIRS}
-			${catkin_INCLUDE_DIRS}
 
 			#GLUT_DIRECTORY
 			/usr/include/GL
@@ -200,72 +189,141 @@ link_directories(${JDE_LIBS}
 add_definitions(${Qt5Widgets_DEFINITIONS})
 ADD_DEFINITIONS(-DQT_NO_KEYWORDS)
 
-add_executable(slam_markers
+add_executable(cam_autoloc
                     ${SOURCES_FILES}
                     ${HEADERS})
 
+# JdeRobot
+add_library(JderobotInterfaces SHARED IMPORTED)
+set_property(TARGET JderobotInterfaces PROPERTY IMPORTED_LOCATION
+			"/opt/jderobot/lib/libJderobotInterfaces.so")
+
+
+add_library(jderobotutil SHARED IMPORTED)
+set_property(TARGET jderobotutil PROPERTY IMPORTED_LOCATION
+			"/opt/jderobot/lib/libjderobotutil.so")
+
+add_library(parallelIce SHARED IMPORTED)
+set_property(TARGET parallelIce PROPERTY IMPORTED_LOCATION
+			"/opt/jderobot/lib/libparallelIce.so")
+
+add_library(colorspacesmm SHARED IMPORTED)
+set_property(TARGET colorspacesmm PROPERTY IMPORTED_LOCATION
+			"/opt/jderobot/lib/libcolorspacesmm.so")
+
+add_library(colorspaces SHARED IMPORTED)
+set_property(TARGET colorspaces PROPERTY IMPORTED_LOCATION
+			"/opt/jderobot/lib/libcolorspaces.a")
+
+add_library(xmlParser SHARED IMPORTED)
+set_property(TARGET xmlParser PROPERTY IMPORTED_LOCATION
+			"/opt/jderobot/lib/libxmlParser.so")
+
+
+add_library(progeo SHARED IMPORTED)
+set_property(TARGET progeo PROPERTY IMPORTED_LOCATION
+			"/opt/jderobot/lib/libprogeo.so")
+
+
+add_library(comm SHARED IMPORTED)
+set_property(TARGET comm PROPERTY IMPORTED_LOCATION
+			"/opt/jderobot/lib/libcomm.so")
+
+
+
+add_library(config SHARED IMPORTED)
+set_property(TARGET config PROPERTY IMPORTED_LOCATION
+			"/opt/jderobot/lib/libconfig.so")
+
+
+add_library(logger SHARED IMPORTED)
+set_property(TARGET logger PROPERTY IMPORTED_LOCATION
+			"/opt/jderobot/lib/liblogger.so")
+
+add_library(libjderobotHandlers SHARED IMPORTED)
+set_property(TARGET libjderobotHandlers PROPERTY IMPORTED_LOCATION
+			"/opt/jderobot/lib/libjderobotHandlers.so")
+
+### ICE
+add_library(Ice2 SHARED IMPORTED)
+set_property(TARGET Ice2 PROPERTY IMPORTED_LOCATION
+			"/usr/lib/x86_64-linux-gnu/libIce.so")
+
+
+
+
+add_library(Ice SHARED IMPORTED)
+set_property(TARGET Ice PROPERTY IMPORTED_LOCATION
+			"/usr/lib/x86_64-linux-gnu/libIce++11.so.36")
+
+
+add_library(IceUtil SHARED IMPORTED)
+set_property(TARGET IceUtil PROPERTY IMPORTED_LOCATION
+"/usr/lib/x86_64-linux-gnu/libIceUtil++11.so.36")
+
+add_library(libeasyiceconfig SHARED IMPORTED)
+set_property(TARGET libeasyiceconfig PROPERTY IMPORTED_LOCATION
+			"/opt/jderobot/lib/libeasyiceconfig.so")
 
 ## aruco
 add_library(Aruco SHARED IMPORTED)
 set_property(TARGET Aruco PROPERTY IMPORTED_LOCATION
 			"/usr/local/lib/libaruco.so")
 
+## Glog
+add_library(Glog SHARED IMPORTED)
+set_property(TARGET Glog PROPERTY IMPORTED_LOCATION
+			"/usr/lib/x86_64-linux-gnu/libglog.so")
 
-add_library(libz SHARED IMPORTED)
-set_property(TARGET libz PROPERTY IMPORTED_LOCATION
-			"/usr/lib/x86_64-linux-gnu/libz.so")
 
-target_link_libraries(slam_markers
-				        ${config_LIBRARIES}
-				        ${comm_LIBRARIES}
+target_link_libraries(cam_autoloc
                       	${Qt5Widgets_LIBRARIES}
                       	${Qt5Core_LIBRARIES}
                       	${Qt5Gui_LIBRARIES}
                       	${Qt5Svg_LIBRARIES}
                       	${CMAKE_THREAD_LIBS_INIT}
-        				${catkin_LIBRARIES}
-       	 				#${ZLIB_LIBRARIES}
-		      			${gtkglextmm_LIBRARIES}
+		      	       ${gtkglextmm_LIBRARIES}
                       	${OpenCV_LIBRARIES}
                       	${OpenCVGUI_LIBRARIES}
                       	${Ice_LIBRARY}
                       	${easyiceconfig_LIBRARIES}
                       	${ZeroCIce_LIBRARIES}
-		      			${GTKMM_LIBRARIES}
-		      			${GTKGLEXTMM_LIBRARIES} 
-		      			${LIBGLADEMM_LIBRARIES}
-		      			${LIBGNOMECANVASMM_LIBRARIES}
-						${OPENGL_LIBRARIES}
-		      			${GLUT_LIBRARIES}
+		      	${GTKMM_LIBRARIES}
+		      	${GTKGLEXTMM_LIBRARIES} 
+    		      	${LIBGLADEMM_LIBRARIES}
+		      	${LIBGNOMECANVASMM_LIBRARIES}
+			${OPENGL_LIBRARIES}
+		      	${GLUT_LIBRARIES}
             	      	${GLOG_LIBRARIES}
-                      	JderobotInterfaces
-                      	jderobotutil
-		      			parallelIce
-	              		colorspacesmm
-						colorspaces
-		      			xmlParser
-	              		progeo
-						pthread
-						Aruco
-						libz
+            JderobotInterfaces
+            jderobotutil
+		    parallelIce
+	        colorspacesmm
+			colorspaces
+		    xmlParser
+	        progeo
+			pthread
+			Ice
+			#Ice2
+			IceUtil
+			Aruco
+			ICE
+			comm
+			config
+			Glog
+			logger
+			libeasyiceconfig
+libjderobotHandlers
 						    ${Boost_LIBRARIES} 
-			
 )
-
-install(TARGETS slam_markers
-    DESTINATION ${CMAKE_INSTALL_PREFIX}/bin/
-    COMPONENT slam_markers
-    )
 
 INSTALL (FILES 
 	${CMAKE_CURRENT_SOURCE_DIR}/resources/ardrone_slam.glade
 	${CMAKE_CURRENT_SOURCE_DIR}/resources/introrob.glade
 	${CMAKE_CURRENT_SOURCE_DIR}/resources/markers.txt
-	${CMAKE_CURRENT_SOURCE_DIR}/resources/configuration.yml
-	${CMAKE_CURRENT_SOURCE_DIR}/resources/sim_calib.yml
+	${CMAKE_CURRENT_SOURCE_DIR}/resources/configuration.cfg
 	DESTINATION
-	${CMAKE_INSTALL_PREFIX}/share/jderobot/conf
-	COMPONENT slam_markers
+	${PROJECT_BINARY_DIR} 
 	 )
     
 
