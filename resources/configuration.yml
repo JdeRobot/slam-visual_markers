@@ -1,0 +1,26 @@
+VisualMarkers:
+  Camera:
+    Server: 2 # 0 -> Deactivate, 1 -> Ice , 2 -> ROS
+    Proxy: "cameraA:default -h localhost -p 9999"
+    Format: RGB8
+    Topic: "/TurtlebotROS/cameraR/image_raw"
+    Name: CamAutolocCamera1
+
+
+  Pose3D:
+    Server: 2 # 0 -> Deactivate, 1 -> Ice , 2 -> ROS
+    Proxy: "default -h 0.0.0.0 -p 8998"
+    Topic: "/visual_slam/pose"
+    Name: CamAutolocPose3d
+
+  NumMarker:
+    Server: 2 # 0 -> Deactivate, 1 -> Ice , 2 -> ROS
+    Topic: "/visual_slam/numMarker"
+    Name: VisualMarkersDetected
+
+  Timer:
+    Server: 2 # 0 -> Deactivate, 1 -> Ice , 2 -> ROS
+    Topic: "/visual_slam/time"
+    Name: VisualMarkersTime
+
+  NodeName: VisualMarkers

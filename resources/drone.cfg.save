@@ -1,2 +1,0 @@
-# Interface to connect webcam
-CamAutoloc.Camera.Proxy = Camera:default -h localhost -p 90.Pose3D.Proxy = default -h 0.0.0.0 -p 8998 
