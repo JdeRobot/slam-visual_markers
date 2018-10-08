@@ -10,6 +10,6 @@ To launch this component you need some files:
 > IMPORTANT: I have calibrated the camera with the jderobot tool, so if you use other you have to change the names to camera_matrix and distortion_coefficients.
 
 Anyways, to launch the component you have to type:
-> $ slam_markers config.yml sim_calib.yml
+> $ visual_markers config.yml sim_calib.yml
 
 Where you launch it, it must contains the files "markers.txt" and glade files.
