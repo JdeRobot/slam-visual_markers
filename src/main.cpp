@@ -1,7 +1,5 @@
 #include <QApplication>
 #include "mainwindow.h"
-#include <Ice/Ice.h>
-#include <IceUtil/IceUtil.h>
 #include "threadgui.h"
 #include "sensors.h"
 #include "threadsensors.h"
@@ -47,23 +45,7 @@ int main(int argc, char *argv[])
 		std::string calib_filename = argv[2];
 		ros::Publisher pub;
 
-		if (serverPose == 1)
-		{
-			// Publish Pose3d with ICE
-
-			std::string endpoint = props.asString("VisualMarkers.Pose3D.Proxy");		
-			std::cout<<"You have selected ICE to publish the estimated pose:\n"<<endpoint<<std::endl;
-			Ice::CommunicatorPtr ic;
-			ic = Ice::initialize(argc, argv);
-
-		    Ice::ObjectAdapterPtr adapter = ic->createObjectAdapterWithEndpoints("Pose3D", endpoint);
-		    Ice::ObjectPtr object = new Pose3DI();
-		    adapter->add(object, ic->stringToIdentity("Pose3D"));
-		    adapter->activate();
 		
-
-
-		}
 	
 		
 
