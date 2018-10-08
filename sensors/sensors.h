@@ -1,20 +1,21 @@
 #ifndef SENSORS_H
 #define SENSORS_H
 
+
 //ICE
 #include <Ice/Ice.h>
 #include <IceUtil/IceUtil.h>
+
 //QT
 #include <QtGui>
 //INTERFACES
 #include <jderobot/camera.h>
-//#include "../src/ArDrone.h"
 #include <jderobot/pose3d.h>
-//#include <quadrotor.h>
+
 
 //COMM
 #include "jderobot/comm/communicator.hpp"
-#include <jderobot/comm/cameraClient.hpp>
+#include "jderobot/comm/cameraClient.hpp"
 
 
 #include <iostream>
@@ -41,7 +42,7 @@ class Sensors
 {
     public:
 
-		Sensors(Comm::Communicator* jdrc);
+	Sensors(Comm::Communicator* jdrc);
         virtual ~Sensors();
         cv::Mat getImage();
     	JdeRobotTypes::Image getImage1();
@@ -58,8 +59,8 @@ class Sensors
 
     private:
 
-		Comm::Communicator* jdrc;
-		Comm::CameraClient* camera;
+	Comm::Communicator* jdrc;
+	Comm::CameraClient* camera;
 
 
         QMutex mutex;
